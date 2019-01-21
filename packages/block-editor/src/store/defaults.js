@@ -129,5 +129,7 @@ export const EDITOR_SETTINGS_DEFAULTS = {
 
 	// Whether richs editing is enabled or not.
 	richEditingEnabled: true,
+	availableLegacyWidgets: {},
+	hasPermissionsToManageWidgets: false,
 };
 
