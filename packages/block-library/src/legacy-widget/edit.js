@@ -172,7 +172,7 @@ class LegacyWidgetEdit extends Component {
 }
 
 export default withSelect( ( select ) => {
-	const editorSettings = select( 'core/editor' ).getEditorSettings();
+	const editorSettings = select( 'core/block-editor' ).getEditorSettings();
 	const {
 		availableLegacyWidgets,
 		hasPermissionsToManageWidgets,
