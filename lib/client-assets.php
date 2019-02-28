@@ -970,14 +970,29 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 
 	$has_permissions_to_manage_widgets = current_user_can( 'edit_theme_options' );
 	$available_legacy_widgets          = array();
-	global $wp_widget_factory;
+	global $wp_widget_factory, $wp_registered_widgets;
 	foreach ( $wp_widget_factory->widgets as $class => $widget_obj ) {
 		if ( ! in_array( $class, $core_widgets ) ) {
 			$available_legacy_widgets[ $class ] = array(
-				'name'        => html_entity_decode( $widget_obj->name ),
-				'description' => html_entity_decode( $widget_obj->widget_options['description'] ),
+				'name'             => html_entity_decode( $widget_obj->name ),
+				'description'      => html_entity_decode( $widget_obj->widget_options['description'] ),
+				'isCallbackWidget' => false,
 			);
 		}
+	}
+	foreach ( $wp_registered_widgets as $widget_id => $widget_obj ) {
+		if (
+			is_array( $widget_obj['callback'] ) &&
+			isset( $widget_obj['callback'][0] ) &&
+			( $widget_obj['callback'][0] instanceof WP_Widget )
+		) {
+			continue;
+		}
+		$available_legacy_widgets[ $widget_id ] = array(
+			'name'             => html_entity_decode( $widget_obj['name'] ),
+			'description'      => null,
+			'isCallbackWidget' => true,
+		);
 	}
 	/**
 	 * End: Include for phase 2
@@ -1018,7 +1033,7 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 
 		// Whether or not to load the 'postcustom' meta box is stored as a user meta
 		// field so that we're not always loading its assets.
-		'enableCustomFields'     => (bool) get_user_meta( get_current_user_id(), 'enable_custom_fields', true ),
+		'enableCustomFields'            => (bool) get_user_meta( get_current_user_id(), 'enable_custom_fields', true ),
 	);
 
 	$post_autosave = gutenberg_get_autosave_newer_than_post_save( $post );

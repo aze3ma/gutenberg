@@ -49,32 +49,37 @@ class LegacyWidgetEdit extends Component {
 			setAttributes,
 		} = this.props;
 		const { isPreview } = this.state;
-		const { identifier } = attributes;
+		const { identifier, isCallbackWidget } = attributes;
 		const widgetObject = identifier && availableLegacyWidgets[ identifier ];
 		if ( ! widgetObject ) {
 			let placeholderContent;
+
 			if ( ! hasPermissionsToManageWidgets ) {
 				placeholderContent = __( 'You don\'t have permissions to use widgets on this site.' );
 			} else if ( availableLegacyWidgets.length === 0 ) {
 				placeholderContent = __( 'There are no widgets available.' );
 			} else {
-				placeholderContent = ( <SelectControl
-					label={ __( 'Select a legacy widget to display:' ) }
-					value={ identifier || 'none' }
-					onChange={ ( value ) => setAttributes( {
-						instance: {},
-						identifier: value,
-					} ) }
-					options={ [ { value: 'none', label: 'Select widget' } ].concat(
-						map( availableLegacyWidgets, ( widget, key ) => {
-							return {
-								value: key,
-								label: widget.name,
-							};
-						} )
-					) }
-				/> );
+				placeholderContent = (
+					<SelectControl
+						label={ __( 'Select a legacy widget to display:' ) }
+						value={ identifier || 'none' }
+						onChange={ ( value ) => setAttributes( {
+							instance: {},
+							identifier: value,
+							isCallbackWidget: availableLegacyWidgets[ value ].isCallbackWidget,
+						} ) }
+						options={ [ { value: 'none', label: 'Select widget' } ].concat(
+							map( availableLegacyWidgets, ( widget, key ) => {
+								return {
+									value: key,
+									label: widget.name,
+								};
+							} )
+						) }
+					/>
+				);
 			}
+
 			return (
 				<Placeholder
 					icon={ <BlockIcon icon="admin-customizer" /> }
@@ -111,34 +116,40 @@ class LegacyWidgetEdit extends Component {
 							icon="update"
 						>
 						</IconButton>
-						<Button
-							className={ `components-tab-button ${ ! isPreview ? 'is-active' : '' }` }
-							onClick={ this.switchToEdit }
-						>
-							<span>{ __( 'Edit' ) }</span>
-						</Button>
-						<Button
-							className={ `components-tab-button ${ isPreview ? 'is-active' : '' }` }
-							onClick={ this.switchToPreview }
-						>
-							<span>{ __( 'Preview' ) }</span>
-						</Button>
+						{ ! isCallbackWidget && (
+							<Fragment>
+								<Button
+									className={ `components-tab-button ${ ! isPreview ? 'is-active' : '' }` }
+									onClick={ this.switchToEdit }
+								>
+									<span>{ __( 'Edit' ) }</span>
+								</Button>
+								<Button
+									className={ `components-tab-button ${ isPreview ? 'is-active' : '' }` }
+									onClick={ this.switchToPreview }
+								>
+									<span>{ __( 'Preview' ) }</span>
+								</Button>
+							</Fragment>
+						) }
 					</Toolbar>
 				</BlockControls>
 				{ inspectorControls }
-				<WidgetEditHandler
-					isVisible={ ! isPreview }
-					identifier={ attributes.identifier }
-					instance={ attributes.instance }
-					onInstanceChange={
-						( newInstance ) => {
-							this.props.setAttributes( {
-								instance: newInstance,
-							} );
+				{ ! isCallbackWidget && (
+					<WidgetEditHandler
+						isVisible={ ! isPreview }
+						identifier={ attributes.identifier }
+						instance={ attributes.instance }
+						onInstanceChange={
+							( newInstance ) => {
+								this.props.setAttributes( {
+									instance: newInstance,
+								} );
+							}
 						}
-					}
-				/>
-				{ isPreview && this.renderWidgetPreview() }
+					/>
+				) }
+				{ ( isPreview || isCallbackWidget ) && this.renderWidgetPreview() }
 			</Fragment>
 		);
 	}
