@@ -24,9 +24,7 @@ ruleTester.run( 'no-base-control-with-label-without-id', rule, {
 			/>`,
 		},
 		{
-			code: `
-			<BaseControl
-			/>`,
+			code: `<BaseControl />`,
 		},
 		{
 			code: `
